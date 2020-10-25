@@ -286,3 +286,12 @@ vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec
     
     return finalCol;
 }
+
+//------------------------------------------------------------
+// PHYSICS INFO
+void moveSphere(out vec4 spherePos, in float time) {
+    if (time < 20.0) {
+    	spherePos.y += (3.0 * abs(sin(time * time))) / (time * time + 0.00001);
+    }
+    spherePos.x += time * 0.5;
+}

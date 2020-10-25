@@ -1,0 +1,67 @@
+color4 calcColor(in sViewport vp, in sRay ray, in float time)
+{
+    sSphere spheres[1];
+    // out sSphere s, in sPoint pos, in sScalar size, in color4 color, in color4 lightColor
+    float ratio = vp.resolution.x * vp.resolutionInv.y;
+    initSphere(spheres[0], vec4(-ratio - 0.3, -0.7, -3.0, 0.0), 0.3, vec4(1.0, 0.0, 0.0, 1.0), vec4(1.0));
+    //initSphere(spheres[1], vec4(-ratio - 0.1, -0.9, -3.0, 0.0), 0.1, vec4(0.0, 1.0, 0.0, 1.0), vec4(1.0));
+    
+    sLight lights[1];
+    // out sLight l, in sPoint pos, in sScalar intensity, in color4 color
+    initLight(lights[0], vec4(0.0, 0.0, 0.0, 0.0), 100.0, vec4(1.0, 1.0, 1.0, 1.0));
+    
+    bool inASphere = false;
+    vec3 finalSphereColor = vec3(0.0);
+    for (int i = spheres.length() - 1; i >= 0; --i) {
+        moveSphere(spheres[i].pos, time);
+        
+        vec3 dp;
+        dp.xy = ray.direction.xy - spheres[i].pos.xy;
+        float lSq = lengthSq(dp.xy);
+        float rSq = spheres[i].size * spheres[i].size;
+        if (lSq <= rSq) {
+            inASphere = true;
+            dp.z = rSq - lSq;
+            vec3 position = spheres[i].pos.xyz + vec3(dp.x, dp.y, sqrt(dp.z));
+            vec3 normal = (position - spheres[i].pos.xyz) / spheres[i].size;
+
+            // Calculates the sum of the effect of all lights on the sphere
+            vec3 lightingInstensitySum = vec3(0.0);
+            for (int i = lights.length() - 1; i >= 0; --i) {
+                float lightDiffuseCoef, lightAttenuation;
+
+                vec3 LightVector = lights[i].pos.xyz - position;
+                float d = sqrt(lengthSq(LightVector));
+
+                lightDiffuseCoef = diffuseCoef(normal, spheres[i].pos.xyz, lights[i].pos.xyz);
+                lightAttenuation = attinuation(lights[i].intensity, d);
+                lightingInstensitySum += finalColor(lightDiffuseCoef, lightAttenuation, spheres[i].color.xyz, lights[i].color.xyz);            
+            }
+			
+            // Final Color
+            float globalAmbientIntensity = 0.05;
+            vec3 globalAmbientColor = vec3(1.0, 1.0, 1.0);
+            finalSphereColor = (globalAmbientIntensity * globalAmbientColor) + lightingInstensitySum;
+        }
+    }
+    if (inASphere) return vec4(finalSphereColor, 1.0);
+    return vec4(0.0, 1.0, 1.0, 1.0);
+}
+
+void mainImage(out color4 fragColor, in sCoord fragCoord)
+{
+	// viewing plane (viewport) inputs
+    const sBasis eyePosition = sBasis(0.0);
+    const sScalar viewportHeight = 2.0, focalLength = 1.5;
+    
+    // viewport info
+    sViewport vp;
+
+    // ray
+    sRay ray;
+    
+    // render
+    initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
+    initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
+    fragColor += calcColor(vp, ray, iTime);
+}
