@@ -1,12 +1,16 @@
 void moveSphere(out vec4 spherePos, in float time) {
-    spherePos.y += time;
+    if (time < 20.0) {
+    	spherePos.y += (3.0 * abs(sin(time * time))) / (time * time + 0.00001);
+    }
+    spherePos.x += time * 0.5;
 }
 
 color4 calcColor(in sViewport vp, in sRay ray, in float time)
 {
     sSphere sphere;
     // out sSphere s, in sPoint pos, in sScalar size, in color4 color, in color4 lightColor
-    initSphere(sphere, vec4(0.0, 0.0, -3.0, 0.0), 0.3, vec4(1.0, 0.0, 0.0, 1.0), vec4(1.0));
+    float ratio = vp.resolution.x * vp.resolutionInv.y;
+    initSphere(sphere, vec4(-ratio - 0.3, -0.7, -3.0, 0.0), 0.3, vec4(1.0, 0.0, 0.0, 1.0), vec4(1.0));
     
     moveSphere(sphere.pos, time);
     
