@@ -3,10 +3,14 @@ float relativeLuminance (in vec3 c) {
 	return dot(w, c);
 }
 
+float falloff (in float lum) {
+	return lum * lum * (3.0 - 2.0 * lum);
+}
+
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     sCoord uv = fragCoord / iChannelResolution[0].xy;	// Normalized texture coordinates
     fragColor = texture(iChannel0, uv);		// Gets the texture
     float rl = relativeLuminance(fragColor.xyz);
-    fragColor = vec4(0.0);	// Performs the lightpass filter
+    fragColor *= falloff(rl * rl);	// Performs the lightpass filter
 }
