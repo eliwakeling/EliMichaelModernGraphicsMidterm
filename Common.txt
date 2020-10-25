@@ -26,6 +26,34 @@
 // color4: alias for RGBA color, which is non-spatial
 // 	(this is non-spatial so neither a point nor vector)
 #define color4 vec4
+//------------------------------------------------------------
+// TYPE ALIASES & UTILITY FUNCTIONS
+
+// sScalar: alias for a 1D scalar (non-vector)
+#define sScalar float
+
+// sCoord: alias for a 2D coordinate
+#define sCoord vec2
+
+// sDCoord: alias for a 2D displacement or measurement
+#define sDCoord vec2
+
+// sBasis: alias for a 3D basis vector
+#define sBasis vec3
+
+// sPoint: alias for a point/coordinate/location in space
+#define sPoint vec4
+
+// sVector: alias for a vector/displacement/change in space
+#define sVector vec4
+
+// color3: alias for a 3D vector representing RGB color
+// 	(this is non-spatial so neither a point nor vector)
+#define color3 vec3
+
+// color4: alias for RGBA color, which is non-spatial
+// 	(this is non-spatial so neither a point nor vector)
+#define color4 vec4
 
 // asPoint: promote a 3D vector into a 4D vector 
 //	representing a point in space (w=1)
@@ -194,4 +222,75 @@ void initSphere(out sSphere s, in sPoint pos, in sScalar size, in color4 color, 
     s.size = size;
     s.color = color;
     s.lightColor = lightColor;
+}
+
+//------------------------------------------------------------
+// LIGHT INFO
+
+// lLight: light data structure
+//		pos: position in scene.
+//		intensity: intensity of the light.
+//		color = light color.
+
+struct lLight
+{
+	sPoint pos;
+    sScalar intensity;
+    color4 color;
+    
+};
+    
+    void initLight(out lLight l, in sPoint pos, in sScalar size, in color4 color) {
+    
+        l.pos = pos;
+        l.intensity = size;
+        l.color = color;
+    }
+
+//------------------------------------------------------------
+// LAMBERTIAN SHADING INFO
+
+//diffuseCoef: find the diffuse coefficient between the light and the sphere.
+// normal: the surface normal of the sphere.
+// position: the position of the sphere.
+// lightCenter: the position of the light.
+
+float diffuseCoef (in sBasis normal, in sBasis position, in sBasis lightCenter) {
+    
+    //Calculate Light Vector.
+    //vec3 lightVec = position - lightCenter;
+    vec3 lightVec = normalize(lightCenter - position);
+    //Calculate the diffuse Coefficient;
+    float diffuseCoef = max(0.0, dot(normal, lightVec));        
+    return diffuseCoef;
+    }
+//attinuation: find the factor from which light fades according to distance between the object and the light.
+// intensity: the intensity of the light.
+// dist: the distance between the object and the light.
+
+float attinuation (in sScalar intensity, in sScalar dist) {
+ 
+   //Establish proper order of opperations.
+   float dist1 = dist / intensity;
+   float dist2 = (dist * dist) / (intensity * intensity);
+   //Find the final Attinuation.
+   float att = 1.0 / (1.0 + dist1 + dist2);
+   return att;
+   
+}
+
+//finalColor: combine the diffuse coeficient, the attinuation, and factor in the surface and light colors.
+//diffcoef: the diffusal coefficient of the objects and lights.
+//attinu: the attinuation factor of the objects and lights.
+//surfaceColor: the color of the rendered object.
+//lightColor: the color of the rendered light.
+
+vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec3 lightColor ){
+	
+    //Find the final color of the object in lambert.
+    float diffIntense = diffcoef * attinu;
+    vec3 finalCol = diffIntense * surfaceColor * lightColor;
+    
+    return finalCol;
+
 }
