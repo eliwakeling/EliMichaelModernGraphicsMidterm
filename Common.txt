@@ -227,12 +227,11 @@ void initSphere(out sSphere s, in sPoint pos, in sScalar size, in color4 color, 
 //------------------------------------------------------------
 // LIGHT INFO
 
-// lLight: light data structure
+// sLight: light data structure
 //		pos: position in scene.
 //		intensity: intensity of the light.
 //		color = light color.
-
-struct lLight
+struct sLight
 {
 	sPoint pos;
     sScalar intensity;
@@ -240,12 +239,11 @@ struct lLight
     
 };
     
-    void initLight(out lLight l, in sPoint pos, in sScalar size, in color4 color) {
-    
-        l.pos = pos;
-        l.intensity = size;
-        l.color = color;
-    }
+void initLight(out sLight l, in sPoint pos, in sScalar intensity, in color4 color) {
+	l.pos = pos;
+	l.intensity = intensity;
+	l.color = color;
+}
 
 //------------------------------------------------------------
 // LAMBERTIAN SHADING INFO
@@ -254,8 +252,7 @@ struct lLight
 // normal: the surface normal of the sphere.
 // position: the position of the sphere.
 // lightCenter: the position of the light.
-
-float diffuseCoef (in sBasis normal, in sBasis position, in sBasis lightCenter) {
+float diffuseCoef(in sBasis normal, in sBasis position, in sBasis lightCenter) {
     
     //Calculate Light Vector.
     //vec3 lightVec = position - lightCenter;
@@ -263,20 +260,18 @@ float diffuseCoef (in sBasis normal, in sBasis position, in sBasis lightCenter) 
     //Calculate the diffuse Coefficient;
     float diffuseCoef = max(0.0, dot(normal, lightVec));        
     return diffuseCoef;
-    }
+}
+
 //attinuation: find the factor from which light fades according to distance between the object and the light.
 // intensity: the intensity of the light.
 // dist: the distance between the object and the light.
-
 float attinuation (in sScalar intensity, in sScalar dist) {
- 
    //Establish proper order of opperations.
    float dist1 = dist / intensity;
    float dist2 = (dist * dist) / (intensity * intensity);
    //Find the final Attinuation.
    float att = 1.0 / (1.0 + dist1 + dist2);
    return att;
-   
 }
 
 //finalColor: combine the diffuse coeficient, the attinuation, and factor in the surface and light colors.
@@ -284,13 +279,10 @@ float attinuation (in sScalar intensity, in sScalar dist) {
 //attinu: the attinuation factor of the objects and lights.
 //surfaceColor: the color of the rendered object.
 //lightColor: the color of the rendered light.
-
-vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec3 lightColor ){
-	
+vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec3 lightColor) {
     //Find the final color of the object in lambert.
     float diffIntense = diffcoef * attinu;
     vec3 finalCol = diffIntense * surfaceColor * lightColor;
     
     return finalCol;
-
 }
