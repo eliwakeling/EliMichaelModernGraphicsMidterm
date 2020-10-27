@@ -5,6 +5,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     // Store the results from the texture channels
     vec4 orig = texture(iChannel0, uv);
+    vec4 blur = texture(iChannel1, uv);
     
-    fragColor = orig;
+    // Perform composition
+    fragColor = orig + blur;
 }

@@ -1,0 +1,7 @@
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    vec2 ps = 1.0 / iChannelResolution[0].xy;
+    vec2 uv = fragCoord * ps;
+    vec2 dirHor = vec2(ps.x, 0.0);
+    fragColor = gaussian7(iChannel0, uv, dirHor);
+}

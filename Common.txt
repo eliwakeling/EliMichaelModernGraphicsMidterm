@@ -258,8 +258,7 @@ float diffuseCoef(in sBasis normal, in sBasis position, in sBasis lightCenter) {
     //vec3 lightVec = position - lightCenter;
     vec3 lightVec = normalize(lightCenter - position);
     //Calculate the diffuse Coefficient;
-    float diffuseCoef = max(0.0, dot(normal, lightVec));        
-    return diffuseCoef;
+    return max(0.0, dot(normal, lightVec));
 }
 
 //attinuation: find the factor from which light fades according to distance between the object and the light.
@@ -270,8 +269,7 @@ float attinuation (in sScalar intensity, in sScalar dist) {
    float dist1 = dist / intensity;
    float dist2 = (dist * dist) / (intensity * intensity);
    //Find the final Attinuation.
-   float att = 1.0 / (1.0 + dist1 + dist2);
-   return att;
+   return 1.0 / (1.0 + dist1 + dist2);
 }
 
 //finalColor: combine the diffuse coeficient, the attinuation, and factor in the surface and light colors.
@@ -282,9 +280,7 @@ float attinuation (in sScalar intensity, in sScalar dist) {
 vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec3 lightColor) {
     //Find the final color of the object in lambert.
     float diffIntense = diffcoef * attinu;
-    vec3 finalCol = diffIntense * surfaceColor * lightColor;
-    
-    return finalCol;
+    return diffIntense * surfaceColor * lightColor;
 }
 
 //------------------------------------------------------------
@@ -294,4 +290,20 @@ void moveSphere(out vec4 spherePos, in float time) {
     	spherePos.y += (3.0 * abs(sin(time * time))) / (time * time + 0.00001);
     }
     spherePos.x += time * 0.5;
+}
+
+//------------------------------------------------------------
+// BLUR INFO
+vec4 gaussian7(in sampler2D tex, in vec2 center, in vec2 direction) {
+	vec2 cp = center + 0.5 * direction;
+	vec2 cn = cp - direction;
+	vec4 color = (texture(tex, cp)
+				+ texture(tex, cn)) * 35.0
+        		+ (texture(tex, cp += direction)
+				+ texture(tex, cn -= direction)) * 21.0
+                + (texture(tex, cp += direction)
+				+ texture(tex, cn -= direction)) * 7.0
+				+ (texture(tex, cp += direction)
+				+ texture(tex, cn -= direction));
+	return (color * 0.0078125);
 }
