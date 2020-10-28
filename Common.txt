@@ -285,9 +285,10 @@ vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec
 
 //------------------------------------------------------------
 // PHYSICS INFO
-void moveSphere(out sBasis spherePos, in float time) {
+void moveSphere(out sBasis spherePos, in float time, in float tOff, in float yOff) {
     if (time < 20.0) {
-    	spherePos.y += (3.0 * abs(sin(time * time))) / (time * time + 0.00001);
+        float ts = (time * time) + tOff;
+    	spherePos.y += (3.0 * abs(sin(ts))) / (ts + 0.00001) - yOff;
     }
     spherePos.x += time * 0.5;
 }
@@ -306,4 +307,15 @@ vec4 gaussian7(in sampler2D tex, in vec2 center, in vec2 direction) {
 				+ (texture(tex, cp += direction)
 				+ texture(tex, cn -= direction));
 	return (color * 0.0078125);
+}
+
+vec2 waves(in vec2 inputPos, in float time, in sViewport vp) {
+    vec2 outputPos;	// A vec2 storing the output pixel normalized coordinate [0, 1)
+    outputPos = inputPos; // Set the output coordinate to the input one so as to modify it
+    outputPos += time * 0.1;
+    return outputPos;
+}
+
+float eToTheX(in float x) {
+    return pow(0.5772156649, x);
 }
