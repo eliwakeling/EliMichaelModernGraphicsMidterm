@@ -204,7 +204,7 @@ void initRayOrtho(out sRay ray,
 //		lightColor: the color of the light the sphere gives off
 struct sSphere
 {
-    sPoint pos;
+    sBasis pos;
     sScalar size;
     color4 color;
     color4 lightColor;
@@ -216,7 +216,7 @@ struct sSphere
 //    size:			input radius
 //    color:		input color of sphere
 //    lightColor:	input color of light source
-void initSphere(out sSphere s, in sPoint pos, in sScalar size, in color4 color, in color4 lightColor)
+void initSphere(out sSphere s, in sBasis pos, in sScalar size, in color4 color, in color4 lightColor)
 {
     s.pos = pos;
     s.size = size;
@@ -233,13 +233,13 @@ void initSphere(out sSphere s, in sPoint pos, in sScalar size, in color4 color, 
 //		color = light color.
 struct sLight
 {
-	sPoint pos;
+	sBasis pos;
     sScalar intensity;
     color4 color;
     
 };
     
-void initLight(out sLight l, in sPoint pos, in sScalar intensity, in color4 color) {
+void initLight(out sLight l, in sBasis pos, in sScalar intensity, in color4 color) {
 	l.pos = pos;
 	l.intensity = intensity;
 	l.color = color;
@@ -285,7 +285,7 @@ vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec
 
 //------------------------------------------------------------
 // PHYSICS INFO
-void moveSphere(out vec4 spherePos, in float time) {
+void moveSphere(out sBasis spherePos, in float time) {
     if (time < 20.0) {
     	spherePos.y += (3.0 * abs(sin(time * time))) / (time * time + 0.00001);
     }

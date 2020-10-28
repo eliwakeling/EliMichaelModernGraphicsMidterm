@@ -1,14 +1,16 @@
-color4 calcColor(in sViewport vp, in sRay ray, in float time)
+color4 calcColor(in sViewport vp, in sRay ray, in float time, in vec4 mousePos)
 {
     sSphere spheres[2];
     // out sSphere s, in sPoint pos, in sScalar size, in color4 color, in color4 lightColor
     float ratio = vp.resolution.x * vp.resolutionInv.y;
-    initSphere(spheres[0], vec4(-ratio - 0.3, -0.8, -1.0, 0.0), 0.2, vec4(0.0, 0.0, 1.0, 1.0), vec4(1.0));
-    initSphere(spheres[1], vec4(-ratio - 0.0, -0.8, 0.0, 0.0), 0.2, vec4(0.0, 1.0, 0.0, 1.0), vec4(1.0));
+    initSphere(spheres[0], vec3(-ratio - 0.3, -0.8, -1.0), 0.2, vec4(0.0, 0.0, 1.0, 1.0), vec4(1.0));
+    initSphere(spheres[1], vec3(-ratio - 0.0, -0.8, 0.0), 0.2, vec4(0.0, 1.0, 0.0, 1.0), vec4(1.0));
     
-    sLight lights[1];
+    sLight lights[spheres.length() + 1];
     // out sLight l, in sPoint pos, in sScalar intensity, in color4 color
-    initLight(lights[0], vec4(0.0, 0.0, 0.0, 0.0), 100.0, vec4(1.0, 1.0, 1.0, 1.0));
+    initLight(lights[0], vec3(2.0 * (mousePos.x * vp.resolutionInv.y) - ratio, 2.0 * (mousePos.y * vp.resolutionInv.y) - 1.0, 0.0), 100.0, vec4(1.0, 1.0, 1.0, 1.0));
+    initLight(lights[1], vec3(0.0), 100.0, spheres[0].lightColor);
+    initLight(lights[2], vec3(0.0), 100.0, spheres[1].lightColor);
     
     int sphereIndex = -1;
     float nearestDepth = -100000.0;
@@ -16,6 +18,7 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     vec3 position, normal;
     for (int i = spheres.length() - 1; i >= 0; --i) {
         moveSphere(spheres[i].pos, time);
+        lights[i+1].pos = spheres[i].pos;
         
         vec3 dp;
         dp.xy = ray.direction.xy - spheres[i].pos.xy;
@@ -74,6 +77,5 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
-    fragColor += calcColor(vp, ray, iTime);
-    //fragColor = texture(iChannel0, vp.uv);
+    fragColor += calcColor(vp, ray, iTime, iMouse);
 }
