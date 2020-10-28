@@ -1,7 +1,7 @@
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-    vec2 ps = 1.0 / iChannelResolution[0].xy;
-    vec2 uv = fragCoord * ps;
-    vec2 dirVert = vec2(0.0, ps.y);
-    fragColor = gaussian7(iChannel0, uv, dirVert);
+    vec2 ps = 1.0 / iChannelResolution[0].xy;	// Inverse of the channel resolution
+    vec2 uv = fragCoord * ps;	// Screensize relative to texture size
+    vec2 dirVert = vec2(0.0, ps.y);	// Direction to perform the Gaussian Blur
+    fragColor = gaussian7(iChannel0, uv, dirVert);	// Does the vertical blur
 }

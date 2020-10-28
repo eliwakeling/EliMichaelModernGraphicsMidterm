@@ -26,34 +26,6 @@
 // color4: alias for RGBA color, which is non-spatial
 // 	(this is non-spatial so neither a point nor vector)
 #define color4 vec4
-//------------------------------------------------------------
-// TYPE ALIASES & UTILITY FUNCTIONS
-
-// sScalar: alias for a 1D scalar (non-vector)
-#define sScalar float
-
-// sCoord: alias for a 2D coordinate
-#define sCoord vec2
-
-// sDCoord: alias for a 2D displacement or measurement
-#define sDCoord vec2
-
-// sBasis: alias for a 3D basis vector
-#define sBasis vec3
-
-// sPoint: alias for a point/coordinate/location in space
-#define sPoint vec4
-
-// sVector: alias for a vector/displacement/change in space
-#define sVector vec4
-
-// color3: alias for a 3D vector representing RGB color
-// 	(this is non-spatial so neither a point nor vector)
-#define color3 vec3
-
-// color4: alias for RGBA color, which is non-spatial
-// 	(this is non-spatial so neither a point nor vector)
-#define color4 vec4
 
 // asPoint: promote a 3D vector into a 4D vector 
 //	representing a point in space (w=1)
@@ -90,6 +62,12 @@ sScalar lengthSq(sBasis x)
 sScalar lengthSq(sVector x)
 {
     return dot(x, x);
+}
+
+// eToTheX: calculate e raised to the x power
+//    x: input the power to raise e to
+float eToTheX(in float x) {
+    return pow(0.5772156649, x);
 }
 
 //------------------------------------------------------------
@@ -238,7 +216,12 @@ struct sLight
     color4 color;
     
 };
-    
+
+// initLight: fill in light variables
+//    s:			output light info structure
+//    pos:			input position
+//    size:			input intensity
+//    color:		input color of light
 void initLight(out sLight l, in sBasis pos, in sScalar intensity, in color4 color) {
 	l.pos = pos;
 	l.intensity = intensity;
@@ -285,6 +268,12 @@ vec3 finalColor(in float diffcoef, in float attinu, in vec3 surfaceColor, in vec
 
 //------------------------------------------------------------
 // PHYSICS INFO
+
+// moveSphere: move the sphere along a path
+//    spherePos:	output sphere position
+//    time:			input time since beginning of program
+//    tOff:			input time offset
+//    yOff:			input y pos offset
 void moveSphere(out sBasis spherePos, in float time, in float tOff, in float yOff) {
     if (time < 20.0) {
         float ts = (time * time) + tOff;
@@ -295,6 +284,11 @@ void moveSphere(out sBasis spherePos, in float time, in float tOff, in float yOf
 
 //------------------------------------------------------------
 // BLUR INFO
+
+// gaussian7: perform a 7 wide/tall gaussian blur on a texture
+//    tex:			input texture
+//    center:		input center of the blur range
+//    direction:	direction to perform the blur
 vec4 gaussian7(in sampler2D tex, in vec2 center, in vec2 direction) {
 	vec2 cp = center + 0.5 * direction;
 	vec2 cn = cp - direction;
@@ -309,13 +303,29 @@ vec4 gaussian7(in sampler2D tex, in vec2 center, in vec2 direction) {
 	return (color * 0.0078125);
 }
 
-vec2 waves(in vec2 inputPos, in float time, in sViewport vp) {
+// relativeLuminance: calculate the luminance of a pixel
+//    c: input pixel
+float relativeLuminance (in vec3 c) {
+	const vec3 w = vec3(0.2126, 0.7152, 0.0722);
+	return dot(w, c);
+}
+
+// falloff: perform a falloff operation on a luminence value
+//    lum: input luminence
+float falloff (in float lum) {
+	return lum * lum * (3.0 - 2.0 * lum);
+}
+
+//------------------------------------------------------------
+// DISTORTION INFO
+
+// distort: distort the backgroun texture by scrolling it diagonally
+//    inputPos:	input texture
+//    time:		input time since beginning of program
+//    vp:		input viewport
+vec2 distort(in vec2 inputPos, in float time, in sViewport vp) {
     vec2 outputPos;	// A vec2 storing the output pixel normalized coordinate [0, 1)
     outputPos = inputPos; // Set the output coordinate to the input one so as to modify it
     outputPos += time * 0.1;
     return outputPos;
-}
-
-float eToTheX(in float x) {
-    return pow(0.5772156649, x);
 }

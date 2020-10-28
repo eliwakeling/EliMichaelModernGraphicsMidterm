@@ -1,16 +1,7 @@
-float relativeLuminance (in vec3 c) {
-	const vec3 w = vec3(0.2126, 0.7152, 0.0722);
-	return dot(w, c);
-}
-
-float falloff (in float lum) {
-	return lum * lum * (3.0 - 2.0 * lum);
-}
-
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     sCoord uv = fragCoord / iChannelResolution[0].xy;	// Normalized texture coordinates
     fragColor = texture(iChannel0, uv);		// Gets the texture
-    float rl = relativeLuminance(fragColor.xyz);
+    float rl = relativeLuminance(fragColor.xyz);	// Gets the relative luminence of the pixel
     fragColor *= falloff(rl * rl);	// Performs the lightpass filter
 }
