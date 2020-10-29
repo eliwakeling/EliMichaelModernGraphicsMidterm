@@ -86,13 +86,10 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time, in vec4 mousePos)
     // For all the lights, calculate their effect on the background
     for (int i = lights.length() - 1; i >= 0; --i) {
         vec3 lightPosition = vec3(((lights[i].pos.x + ratio) * 0.5) * texRatio.y, ((lights[i].pos.y + 1.0) * 0.5) * texRatio.y, 0.2);
-        vec3 ls = lightPosition - surfacePosition;
-        float d = sqrt(lengthSq(ls));
-        vec3 lightVector = ls / d;
-        float diffuseCoefficient = dot(surfaceNormal, lightVector);
+        float d = sqrt(lengthSq(lightPosition - surfacePosition));
+        float diffuseCoefficient = diffuseCoef(surfaceNormal, surfacePosition, lightPosition);
         // Attenuated intensity
-        float intensityInv = 1.0 / lights[i].intensity;
-        float attenuatedIntensity = 1.0 / (1.0 + d * intensityInv + (d * d) * (intensityInv * intensityInv));
+        float attenuatedIntensity = attinuation(lights[i].intensity, d);
         // Diffuse intensity
         float diffuseIntensity = diffuseCoefficient * attenuatedIntensity;
 

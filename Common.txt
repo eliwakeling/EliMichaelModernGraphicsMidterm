@@ -214,7 +214,6 @@ struct sLight
 	sBasis pos;
     sScalar intensity;
     color4 color;
-    
 };
 
 // initLight: fill in light variables
@@ -236,10 +235,10 @@ void initLight(out sLight l, in sBasis pos, in sScalar intensity, in color4 colo
 // position: the position of the sphere.
 // lightCenter: the position of the light.
 float diffuseCoef(in sBasis normal, in sBasis position, in sBasis lightCenter) {
-    
     //Calculate Light Vector.
-    //vec3 lightVec = position - lightCenter;
-    vec3 lightVec = normalize(lightCenter - position);
+    vec3 ls = lightCenter - position;
+    float d = sqrt(lengthSq(ls));
+    vec3 lightVec = ls / d;
     //Calculate the diffuse Coefficient;
     return max(0.0, dot(normal, lightVec));
 }
@@ -247,10 +246,11 @@ float diffuseCoef(in sBasis normal, in sBasis position, in sBasis lightCenter) {
 //attinuation: find the factor from which light fades according to distance between the object and the light.
 // intensity: the intensity of the light.
 // dist: the distance between the object and the light.
-float attinuation (in sScalar intensity, in sScalar dist) {
+float attinuation(in sScalar intensity, in sScalar dist) {
    //Establish proper order of opperations.
-   float dist1 = dist / intensity;
-   float dist2 = (dist * dist) / (intensity * intensity);
+   sScalar intensityInv = 1.0 / intensity;
+   float dist1 = dist * intensityInv;
+   float dist2 = (dist * dist) * (intensityInv * intensityInv);
    //Find the final Attinuation.
    return 1.0 / (1.0 + dist1 + dist2);
 }
